@@ -223,7 +223,7 @@
       border-radius: var(--r);
       overflow: hidden;
     }
-    table { width: 100%; border-collapse: collapse; }
+    table { width: 100%; border-collapse: collapse; table-layout: auto; }
     thead th {
       background: hsl(222,47%,8%);
       padding: .6rem 1rem;
@@ -231,6 +231,12 @@
       text-transform: uppercase; letter-spacing: .07em; color: var(--muted);
       border-bottom: 1px solid var(--border);
       white-space: nowrap;
+    }
+    th.col-chk, td.col-chk {
+      width: 40px; min-width: 40px; max-width: 40px;
+      padding: .65rem .875rem;
+      border-right: 1px solid var(--border);
+      text-align: center;
     }
     tbody tr { border-bottom: 1px solid hsl(222,47%,12%); transition: background .1s; }
     tbody tr:last-child { border-bottom: none; }
@@ -518,8 +524,8 @@
     <div class="tbl-wrap">
       <table>
         <thead><tr>
-          <th style="width:2.25rem">
-            <input type="checkbox" id="chk-all" style="accent-color:var(--blue);cursor:pointer"
+          <th class="col-chk">
+            <input type="checkbox" id="chk-all" style="accent-color:var(--blue);cursor:pointer;display:block;margin:0 auto"
               onchange="toggleAll(this)" />
           </th>
           <th>Contact</th><th>Fund</th><th>Type</th>
@@ -667,8 +673,8 @@ function renderPortcoRows(contacts) {
     const checked = selectedIdxs.has(i) ? 'checked' : '';
     return `
       <tr id="row-${i}" style="${selectedIdxs.has(i)?'background:hsl(217,91%,60%,0.06)':''}">
-        <td style="width:2.25rem">
-          <input type="checkbox" ${checked} style="accent-color:var(--blue);cursor:pointer"
+        <td class="col-chk">
+          <input type="checkbox" ${checked} style="accent-color:var(--blue);cursor:pointer;display:block;margin:0 auto"
             onchange="toggleRow(this,${i})" />
         </td>
         <td><div class="td-name">${c.name}</div><div class="td-sub">${c.title}</div></td>
