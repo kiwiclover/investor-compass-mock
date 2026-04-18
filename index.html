@@ -479,7 +479,7 @@
       </div>
       <div class="detail-actions">
         <button class="btn btn-outline" style="font-size:12px">Export</button>
-        <button class="btn btn-primary" style="font-size:12px">Generate outreach</button>
+        <button class="btn btn-primary" style="font-size:12px" onclick="generateFirst()">Generate first message</button>
       </div>
     </div>
 
@@ -491,9 +491,37 @@
       <div class="row-count" id="portco-count"></div>
     </div>
 
+    <!-- bulk action bar -->
+    <div id="bulk-bar" style="display:none; align-items:center; gap:.75rem;
+      background:var(--surface); border:1px solid var(--border); border-radius:var(--r);
+      padding:.5rem .875rem; margin-bottom:.625rem; font-size:13px;">
+      <span id="bulk-count" style="color:var(--muted); white-space:nowrap"></span>
+      <select id="bulk-status-sel" class="status-sel s-none"
+        style="border-radius:var(--r); padding:.3rem .7rem; font-size:12px"
+        onchange="applyBulkStatus(this)">
+        <option value="">Change status…</option>
+        <option value="none">Not In Contact</option>
+        <option value="email">Email Outreach</option>
+        <option value="pos">Outreach Positive Reply</option>
+        <option value="neg">Outreach Negative Reply</option>
+        <option value="booked">Meeting Booked</option>
+        <option value="done">Meeting Done</option>
+        <option value="neg2">In Negotiation</option>
+      </select>
+      <button class="btn btn-primary" style="font-size:12px" onclick="generateFirst()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Generate first message
+      </button>
+      <button class="btn btn-ghost" style="font-size:12px;margin-left:auto" onclick="clearSelection()">Clear</button>
+    </div>
+
     <div class="tbl-wrap">
       <table>
         <thead><tr>
+          <th style="width:2.25rem">
+            <input type="checkbox" id="chk-all" style="accent-color:var(--blue);cursor:pointer"
+              onchange="toggleAll(this)" />
+          </th>
           <th>Contact</th><th>Fund</th><th>Type</th>
           <th>Email</th><th>LinkedIn</th><th>Status</th>
         </tr></thead>
@@ -626,6 +654,8 @@ function renderDetail(p) {
   renderPortcoRows(p.contacts);
 }
 
+let selectedIdxs = new Set();
+
 function renderPortcoRows(contacts) {
   document.getElementById('portco-count').innerHTML =
     `<strong>${contacts.length}</strong> contacts`;
@@ -634,8 +664,13 @@ function renderPortcoRows(contacts) {
     const opts = STATUSES.map(st =>
       `<option value="${st.v}"${st.v === c.status?' selected':''}>${st.label}</option>`
     ).join('');
+    const checked = selectedIdxs.has(i) ? 'checked' : '';
     return `
-      <tr>
+      <tr id="row-${i}" style="${selectedIdxs.has(i)?'background:hsl(217,91%,60%,0.06)':''}">
+        <td style="width:2.25rem">
+          <input type="checkbox" ${checked} style="accent-color:var(--blue);cursor:pointer"
+            onchange="toggleRow(this,${i})" />
+        </td>
         <td><div class="td-name">${c.name}</div><div class="td-sub">${c.title}</div></td>
         <td style="font-size:13px">${c.fund}</td>
         <td style="font-size:12px;color:var(--muted)">${c.type}</td>
@@ -649,6 +684,83 @@ function renderPortcoRows(contacts) {
       </tr>
     `;
   }).join('');
+  syncSelectAll();
+  updateBulkBar();
+}
+
+function toggleRow(chk, i) {
+  chk.checked ? selectedIdxs.add(i) : selectedIdxs.delete(i);
+  const row = document.getElementById('row-' + i);
+  if (row) row.style.background = chk.checked ? 'hsl(217,91%,60%,0.06)' : '';
+  syncSelectAll();
+  updateBulkBar();
+}
+
+function toggleAll(chk) {
+  const rows = document.querySelectorAll('#portco-tbody tr');
+  rows.forEach((_, i) => {
+    chk.checked ? selectedIdxs.add(i) : selectedIdxs.delete(i);
+    const row = document.getElementById('row-' + i);
+    const box = row && row.querySelector('input[type=checkbox]');
+    if (row) row.style.background = chk.checked ? 'hsl(217,91%,60%,0.06)' : '';
+    if (box) box.checked = chk.checked;
+  });
+  updateBulkBar();
+}
+
+function syncSelectAll() {
+  const total = document.querySelectorAll('#portco-tbody tr').length;
+  const chkAll = document.getElementById('chk-all');
+  if (!chkAll) return;
+  chkAll.indeterminate = selectedIdxs.size > 0 && selectedIdxs.size < total;
+  chkAll.checked = total > 0 && selectedIdxs.size === total;
+}
+
+function updateBulkBar() {
+  const bar = document.getElementById('bulk-bar');
+  const cnt = document.getElementById('bulk-count');
+  if (!bar) return;
+  if (selectedIdxs.size === 0) {
+    bar.style.display = 'none';
+  } else {
+    bar.style.display = 'flex';
+    cnt.textContent = `${selectedIdxs.size} selected`;
+    // reset bulk status dropdown
+    const sel = document.getElementById('bulk-status-sel');
+    if (sel) { sel.value = ''; STATUSES.forEach(s => sel.classList.remove(s.cls)); sel.classList.add('s-none'); }
+  }
+}
+
+function applyBulkStatus(sel) {
+  if (!sel.value || !currentPortco) return;
+  const s = STATUSES.find(x => x.v === sel.value);
+  selectedIdxs.forEach(i => {
+    if (currentPortco.contacts[i]) currentPortco.contacts[i].status = sel.value;
+  });
+  // update cls on the select
+  STATUSES.forEach(st => sel.classList.remove(st.cls));
+  sel.classList.add(s.cls);
+  // re-render keeping selection
+  const q = document.getElementById('portco-search').value.toLowerCase();
+  const contacts = q ? currentPortco.contacts.filter(c =>
+    c.name.toLowerCase().includes(q) || c.fund.toLowerCase().includes(q)
+  ) : currentPortco.contacts;
+  renderPortcoRows(contacts);
+}
+
+function clearSelection() {
+  selectedIdxs.clear();
+  const q = document.getElementById('portco-search').value.toLowerCase();
+  const contacts = currentPortco ? (q ? currentPortco.contacts.filter(c =>
+    c.name.toLowerCase().includes(q) || c.fund.toLowerCase().includes(q)
+  ) : currentPortco.contacts) : [];
+  renderPortcoRows(contacts);
+}
+
+function generateFirst() {
+  const names = [...selectedIdxs].map(i => currentPortco && currentPortco.contacts[i] ? currentPortco.contacts[i].name : '').filter(Boolean);
+  if (names.length === 0) { alert('Select at least one contact first.'); return; }
+  alert(`Generating first message for:\n${names.join('\n')}\n\n(Mock — no real generation)`);
 }
 
 function updateStatus(sel, i) {
@@ -661,6 +773,7 @@ function updateStatus(sel, i) {
 
 function filterTable() {
   if (!currentPortco) return;
+  selectedIdxs.clear();
   const q = document.getElementById('portco-search').value.toLowerCase();
   const filtered = q ? currentPortco.contacts.filter(c =>
     c.name.toLowerCase().includes(q) || c.fund.toLowerCase().includes(q)
