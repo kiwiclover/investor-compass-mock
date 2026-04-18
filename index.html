@@ -395,12 +395,12 @@
         <div class="shortcut-desc">All contacts in one table</div>
       </div>
 
-      <div class="shortcut" onclick="navigate('new-investors')">
+      <div class="shortcut" onclick="navigate('leads-update')">
         <div class="shortcut-icon">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
         </div>
-        <div class="shortcut-title">Search companies</div>
-        <div class="shortcut-desc">Prospects & investees</div>
+        <div class="shortcut-title">Leads & Company Update</div>
+        <div class="shortcut-desc">Upload CSV via webhook</div>
       </div>
 
       <div class="shortcut" onclick="navigate('crm')">
@@ -429,12 +429,6 @@
         <svg class="tool-row-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
         <span class="tool-row-name">Transform to CSV</span>
         <span class="tool-row-desc">Document parser</span>
-      </div>
-
-      <div class="tool-row">
-        <svg class="tool-row-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
-        <span class="tool-row-name">Leads & Company Update</span>
-        <span class="tool-row-desc">CSV upload via webhook</span>
       </div>
 
       <div class="tool-row">
@@ -1353,7 +1347,7 @@ function luFileSelected(input) {
 
 // ── Wire up tool-row clicks on home ───────────────────────────────────────
 document.querySelectorAll('.tool-row').forEach((row, i) => {
-  const views = ['new-investors','pick-base','transform-csv','leads-update','upload-id','new-leads'];
+  const views = ['new-investors','transform-csv','upload-id','new-leads'];
   row.onclick = () => navigate(views[i] || 'home');
 });
 </script>
