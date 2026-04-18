@@ -277,6 +277,68 @@
     .proc-prog { background:hsl(217,50%,30%,0.3); color:hsl(217,70%,72%); }
     .proc-q    { background:hsl(215,15%,52%,0.1); color:hsl(215,15%,62%); }
 
+    /* ── Form components ──────────────────────────────────────── */
+    .form-grid {
+      display: grid; grid-template-columns: repeat(2,1fr); gap: .875rem;
+    }
+    @media(max-width:600px) { .form-grid { grid-template-columns: 1fr; } }
+
+    .form-cols {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 1.25rem;
+    }
+    @media(max-width:700px) { .form-cols { grid-template-columns: 1fr; } }
+
+    .field-group { display: flex; flex-direction: column; gap: .35rem; }
+    .field-label {
+      font-size: 12px; font-weight: 500; color: var(--fg);
+      display: flex; align-items: center; gap: .3rem;
+    }
+    .field-opt { font-weight: 400; color: var(--muted); }
+    .field-req { color: var(--blue); }
+    .field-hint { font-size: 11px; color: var(--muted); margin-top: .15rem; }
+
+    .field-input {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r); padding: .45rem .75rem;
+      color: var(--fg); font-size: 13px; font-family: inherit;
+      outline: none; transition: border-color .15s;
+    }
+    .field-input:focus { border-color: hsl(217,91%,60%,0.45); }
+    .field-input::placeholder { color: var(--muted); }
+
+    .field-select {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r); padding: .45rem .75rem;
+      color: var(--fg); font-size: 13px; font-family: inherit;
+      outline: none; transition: border-color .15s; width: 100%;
+      cursor: pointer; appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%2364748b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right .65rem center;
+      padding-right: 2rem;
+    }
+    .field-select:focus { border-color: hsl(217,91%,60%,0.45); }
+
+    .field-textarea {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r); padding: .5rem .75rem;
+      color: var(--fg); font-size: 13px; font-family: inherit;
+      outline: none; transition: border-color .15s;
+      resize: vertical; width: 100%; line-height: 1.5;
+    }
+    .field-textarea:focus { border-color: hsl(217,91%,60%,0.45); }
+    .field-textarea::placeholder { color: var(--muted); }
+
+    /* chip multi-select */
+    .chip-row { display: flex; flex-wrap: wrap; gap: .375rem; }
+    .chip {
+      padding: .3rem .65rem; border-radius: 99px; cursor: pointer;
+      font-size: 12px; font-weight: 500; transition: all .15s;
+      border: 1px solid var(--border); background: transparent; color: var(--muted);
+      font-family: inherit;
+    }
+    .chip:hover { border-color: hsl(217,91%,60%,0.4); color: var(--fg); }
+    .chip.active { background: hsl(217,91%,60%,0.12); color: var(--blue); border-color: hsl(217,91%,60%,0.35); }
+
     .mock-badge {
       position: fixed; bottom: 1rem; right: 1rem;
       background: var(--surface); border: 1px solid var(--border);
@@ -317,7 +379,7 @@
     <div class="section-title">Quick access</div>
     <div class="shortcuts">
 
-      <div class="shortcut" onclick="navigate('home')">
+      <div class="shortcut" onclick="navigate('pick-base')">
         <div class="shortcut-icon">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.87"/></svg>
         </div>
@@ -333,9 +395,9 @@
         <div class="shortcut-desc">All contacts in one table</div>
       </div>
 
-      <div class="shortcut" onclick="navigate('home')">
+      <div class="shortcut" onclick="navigate('new-investors')">
         <div class="shortcut-icon">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
         </div>
         <div class="shortcut-title">Search companies</div>
         <div class="shortcut-desc">Prospects & investees</div>
@@ -535,6 +597,425 @@
       </table>
     </div>
 
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ VIEW: NEW INVESTORS SEARCH -->
+<div id="view-new-investors" class="view">
+  <div class="page">
+    <div class="page-head">
+      <button class="btn btn-ghost" onclick="navigate('home')" style="padding:.4rem .5rem">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </button>
+      <div>
+        <div class="page-head-title">New Investors Search</div>
+        <div class="page-head-sub">Search external databases — PitchBook via Apify</div>
+      </div>
+    </div>
+
+    <!-- mode toggle -->
+    <div style="display:flex;gap:.375rem;margin-bottom:1.5rem">
+      <button class="btn btn-active" id="ni-tab-contact" onclick="niSetMode('contact')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
+        Contact
+      </button>
+      <button class="btn btn-ghost" id="ni-tab-company" onclick="niSetMode('company')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        Company
+      </button>
+    </div>
+
+    <!-- contact form -->
+    <div id="ni-form-contact">
+      <div class="form-grid">
+        <div class="field-group">
+          <label class="field-label">Primary Contact</label>
+          <input class="field-input" type="text" placeholder="Full name" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Company / Fund</label>
+          <input class="field-input" type="text" placeholder="e.g. Sequoia Capital" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Email</label>
+          <input class="field-input" type="email" placeholder="investor@fund.com" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">LinkedIn</label>
+          <input class="field-input" type="text" placeholder="linkedin.com/in/…" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Location</label>
+          <select class="field-select">
+            <option value="">Any region</option>
+            <option>North America</option><option>Europe</option><option>Latin America</option>
+            <option>Asia Pacific</option><option>Middle East & Africa</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Specific Location <span class="field-opt">optional</span></label>
+          <input class="field-input" type="text" placeholder="City or state" />
+        </div>
+      </div>
+
+      <div class="field-group" style="margin-top:1rem">
+        <label class="field-label">Investor Type</label>
+        <div class="chip-row" id="ni-types"></div>
+      </div>
+
+      <div class="field-group" style="margin-top:1rem">
+        <label class="field-label">DCG Portfolio Company <span class="field-opt">optional</span></label>
+        <select class="field-select" style="max-width:280px">
+          <option value="">None</option>
+          <option>Portoro</option><option>Cedar Brands</option><option>Ownershift</option>
+          <option>Wellnest</option><option>Bloomwell</option><option>Maro</option>
+          <option>Immersiv</option><option>Calibright</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- company form -->
+    <div id="ni-form-company" style="display:none">
+      <div class="field-group" style="max-width:420px">
+        <label class="field-label">Company Name or Upload ID</label>
+        <input class="field-input" type="text" placeholder="e.g. Sequoia Capital or upload_abc123" />
+        <div class="field-hint">Search by company name or paste a PitchBook Upload ID</div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:.5rem;margin-top:1.75rem;padding-top:1.25rem;border-top:1px solid var(--border)">
+      <button class="btn btn-primary" onclick="showSearchResults('ni-results')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        Search
+      </button>
+      <button class="btn btn-ghost" onclick="resetForm('ni')">Reset</button>
+    </div>
+
+    <!-- mock results -->
+    <div id="ni-results" style="display:none;margin-top:1.5rem">
+      <div class="section-title" style="margin-bottom:.75rem">Results — 12 investors found</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Contact</th><th>Fund</th><th>Type</th><th>Location</th><th>LinkedIn</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td><div class="td-name">Alexandra West</div><div class="td-sub">Managing Partner</div></td><td>Apex Ventures</td><td style="color:var(--muted);font-size:12px">VC</td><td style="color:var(--muted);font-size:12px">San Francisco, US</td><td class="td-link"><a href="#" onclick="return false">↗</a></td><td><button class="btn btn-outline" style="font-size:11px;padding:.25rem .6rem">Add</button></td></tr>
+            <tr><td><div class="td-name">Carlos Mendes</div><div class="td-sub">Principal</div></td><td>Bridge Capital</td><td style="color:var(--muted);font-size:12px">VC</td><td style="color:var(--muted);font-size:12px">New York, US</td><td class="td-link"><a href="#" onclick="return false">↗</a></td><td><button class="btn btn-outline" style="font-size:11px;padding:.25rem .6rem">Add</button></td></tr>
+            <tr><td><div class="td-name">Nina Oyelaran</div><div class="td-sub">Partner</div></td><td>Vertex Growth</td><td style="color:var(--muted);font-size:12px">PE</td><td style="color:var(--muted);font-size:12px">London, UK</td><td class="td-link"><a href="#" onclick="return false">↗</a></td><td><button class="btn btn-outline" style="font-size:11px;padding:.25rem .6rem">Add</button></td></tr>
+            <tr><td><div class="td-name">Wei Zhao</div><div class="td-sub">GP</div></td><td>PacRim Fund</td><td style="color:var(--muted);font-size:12px">VC</td><td style="color:var(--muted);font-size:12px">Singapore</td><td class="td-link"><a href="#" onclick="return false">↗</a></td><td><button class="btn btn-outline" style="font-size:11px;padding:.25rem .6rem">Add</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ VIEW: PICK FROM BASE -->
+<div id="view-pick-base" class="view">
+  <div class="page">
+    <div class="page-head">
+      <button class="btn btn-ghost" onclick="navigate('home')" style="padding:.4rem .5rem">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </button>
+      <div>
+        <div class="page-head-title">Pick from our base</div>
+        <div class="page-head-sub">Search the internal investor database</div>
+      </div>
+    </div>
+
+    <!-- mode toggle -->
+    <div style="display:flex;gap:.375rem;margin-bottom:1.5rem">
+      <button class="btn btn-active" id="pb-tab-contact" onclick="pbSetMode('contact')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
+        Contact
+      </button>
+      <button class="btn btn-ghost" id="pb-tab-company" onclick="pbSetMode('company')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        Company
+      </button>
+    </div>
+
+    <!-- contact form -->
+    <div id="pb-form-contact">
+      <div class="field-group" style="max-width:420px;margin-bottom:1.25rem">
+        <label class="field-label">Search text <span class="field-opt">optional</span></label>
+        <input class="field-input" type="text" placeholder="Name, fund, keyword…" />
+      </div>
+
+      <div class="form-cols">
+        <div>
+          <div class="field-label" style="margin-bottom:.5rem">Investor Type</div>
+          <div class="chip-row" id="pb-types"></div>
+        </div>
+        <div>
+          <div class="field-label" style="margin-bottom:.5rem">Geography</div>
+          <div style="display:flex;flex-direction:column;gap:.5rem">
+            <select class="field-select"><option value="">Any region</option><option>North America</option><option>Europe</option><option>Latin America</option><option>Asia Pacific</option><option>Middle East & Africa</option></select>
+            <input class="field-input" type="text" placeholder="Specific country" />
+            <input class="field-input" type="text" placeholder="City" />
+          </div>
+        </div>
+        <div>
+          <div class="field-label" style="margin-bottom:.5rem">Fund size (AUM)</div>
+          <select class="field-select" style="margin-bottom:.5rem">
+            <option>Any amount</option><option>Under $50M</option><option>$50M – $100M</option>
+            <option>$100M – $500M</option><option>$500M – $1B</option><option>$1B – $5B</option>
+            <option>$5B – $10B</option><option>Over $10B</option>
+          </select>
+          <div class="field-label" style="margin-bottom:.5rem">Min. investments</div>
+          <select class="field-select">
+            <option>No minimum</option><option>At least 5</option><option>At least 10</option>
+            <option>At least 25</option><option>At least 50</option><option>At least 100</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- company form -->
+    <div id="pb-form-company" style="display:none">
+      <div class="field-group" style="max-width:420px">
+        <label class="field-label">Company name</label>
+        <input class="field-input" type="text" placeholder="Search by company or fund name" />
+      </div>
+    </div>
+
+    <div style="display:flex;gap:.5rem;margin-top:1.75rem;padding-top:1.25rem;border-top:1px solid var(--border)">
+      <button class="btn btn-primary" onclick="showSearchResults('pb-results')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        Search
+      </button>
+      <button class="btn btn-ghost" onclick="resetForm('pb')">Reset</button>
+    </div>
+
+    <!-- mock results -->
+    <div id="pb-results" style="display:none;margin-top:1.5rem">
+      <div class="section-title" style="margin-bottom:.75rem">Results — 8 investors found</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Contact</th><th>Fund</th><th>Type</th><th>Stage focus</th><th>Email</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td><div class="td-name">Sarah Chen</div><div class="td-sub">Partner</div></td><td>Sequoia Capital</td><td style="color:var(--muted);font-size:12px">VC</td><td style="color:var(--muted);font-size:12px">Series A–C</td><td style="color:var(--muted);font-size:12px">s.chen@sequoia.com</td><td><button class="btn btn-outline" style="font-size:11px;padding:.25rem .6rem">Select</button></td></tr>
+            <tr><td><div class="td-name">Marco Rossi</div><div class="td-sub">Principal</div></td><td>Andreessen Horowitz</td><td style="color:var(--muted);font-size:12px">VC</td><td style="color:var(--muted);font-size:12px">Seed–B</td><td style="color:var(--muted);font-size:12px">m.rossi@a16z.com</td><td><button class="btn btn-outline" style="font-size:11px;padding:.25rem .6rem">Select</button></td></tr>
+            <tr><td><div class="td-name">Priya Nair</div><div class="td-sub">Managing Director</div></td><td>General Catalyst</td><td style="color:var(--muted);font-size:12px">VC</td><td style="color:var(--muted);font-size:12px">Series B+</td><td style="color:var(--muted);font-size:12px">p.nair@gc.com</td><td><button class="btn btn-outline" style="font-size:11px;padding:.25rem .6rem">Select</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ VIEW: NEW LEADS & COMPANIES -->
+<div id="view-new-leads" class="view">
+  <div class="page">
+    <div class="page-head">
+      <button class="btn btn-ghost" onclick="navigate('home')" style="padding:.4rem .5rem">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </button>
+      <div>
+        <div class="page-head-title">New Leads & Companies</div>
+        <div class="page-head-sub">Manually add a contact or company record</div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:.375rem;margin-bottom:1.5rem">
+      <button class="btn btn-active" id="nl-tab-contact" onclick="nlSetMode('contact')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
+        Contact
+      </button>
+      <button class="btn btn-ghost" id="nl-tab-company" onclick="nlSetMode('company')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        Company
+      </button>
+    </div>
+
+    <!-- contact -->
+    <div id="nl-form-contact">
+      <div class="form-grid">
+        <div class="field-group">
+          <label class="field-label">Full name <span class="field-req">*</span></label>
+          <input class="field-input" type="text" placeholder="e.g. Jane Doe" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Company / Fund <span class="field-req">*</span></label>
+          <input class="field-input" type="text" placeholder="e.g. Acme Ventures" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Email</label>
+          <input class="field-input" type="email" placeholder="jane@fund.com" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">LinkedIn</label>
+          <input class="field-input" type="text" placeholder="linkedin.com/in/…" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Location</label>
+          <select class="field-select">
+            <option value="">Select region</option>
+            <option>United States</option><option>Brazil</option><option>United Kingdom</option>
+            <option>Germany</option><option>Singapore</option><option>Other</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">City / State <span class="field-opt">optional</span></label>
+          <input class="field-input" type="text" placeholder="e.g. San Francisco, CA" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Project <span class="field-opt">optional</span></label>
+          <input class="field-input" type="text" placeholder="e.g. Fund II Mapping" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Fit <span class="field-opt">optional</span></label>
+          <select class="field-select">
+            <option value="">Select fit</option>
+            <option>High</option><option>Moderate</option><option>Low</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-group" style="margin-top:1rem">
+        <label class="field-label">Investor Type</label>
+        <div class="chip-row" id="nl-types"></div>
+      </div>
+    </div>
+
+    <!-- company -->
+    <div id="nl-form-company" style="display:none">
+      <div class="form-grid">
+        <div class="field-group">
+          <label class="field-label">Company name <span class="field-req">*</span></label>
+          <input class="field-input" type="text" placeholder="e.g. Sequoia Capital" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Investor Type</label>
+          <select class="field-select"><option value="">Select type</option><option>Venture Capital</option><option>Private Equity</option><option>Corporate VC</option><option>Hedge Fund</option><option>Family Office</option></select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Primary Sector</label>
+          <select class="field-select"><option value="">Select sector</option><option>Enterprise Software / SaaS</option><option>Fintech / Financial Services</option><option>Healthcare / Life Sciences</option><option>AI / Machine Learning</option><option>Climate / Clean Energy</option><option>Consumer / E-Commerce</option><option>Deep Tech / Hardware</option></select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Location</label>
+          <select class="field-select"><option value="">Select region</option><option>United States</option><option>Brazil</option><option>United Kingdom</option><option>Germany</option><option>Singapore</option></select>
+        </div>
+      </div>
+      <div class="field-group" style="margin-top:1rem">
+        <label class="field-label">Description <span class="field-opt">optional</span></label>
+        <textarea class="field-textarea" placeholder="Brief description of the firm…" rows="3"></textarea>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:.5rem;margin-top:1.75rem;padding-top:1.25rem;border-top:1px solid var(--border)">
+      <button class="btn btn-primary" onclick="alert('Record submitted (mock)')">Submit record</button>
+      <button class="btn btn-ghost">Reset</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ VIEW: TRANSFORM TO CSV -->
+<div id="view-transform-csv" class="view">
+  <div class="page">
+    <div class="page-head">
+      <button class="btn btn-ghost" onclick="navigate('home')" style="padding:.4rem .5rem">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </button>
+      <div>
+        <div class="page-head-title">Transform to CSV</div>
+        <div class="page-head-sub">Parse a document and extract investor data</div>
+      </div>
+    </div>
+
+    <div style="max-width:480px">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.5rem;display:flex;flex-direction:column;gap:1rem">
+        <div style="display:flex;gap:.75rem;align-items:flex-start">
+          <div style="width:36px;height:36px;border-radius:8px;background:hsl(217,91%,60%,0.1);display:flex;align-items:center;justify-content:center;color:var(--blue);flex-shrink:0">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <div>
+            <div style="font-weight:600;font-size:14px;margin-bottom:.2rem">Document Parser</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.5">Upload a document (PDF, Excel, Word) containing investor data and the parser will extract structured records ready to import.</div>
+          </div>
+        </div>
+        <a href="https://document-parser-nine.vercel.app/" target="_blank" style="text-decoration:none">
+          <button class="btn btn-primary" style="width:100%;justify-content:center">
+            Open document parser
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </button>
+        </a>
+        <div style="font-size:11px;color:var(--muted);text-align:center">Opens in a new tab → paste results back here via Leads &amp; Company Update</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ VIEW: UPLOAD ID ENRICHMENT -->
+<div id="view-upload-id" class="view">
+  <div class="page">
+    <div class="page-head">
+      <button class="btn btn-ghost" onclick="navigate('home')" style="padding:.4rem .5rem">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </button>
+      <div>
+        <div class="page-head-title">Upload ID Enrichment</div>
+        <div class="page-head-sub">Send Upload IDs to the enrichment webhook</div>
+      </div>
+    </div>
+
+    <div style="max-width:480px;display:flex;flex-direction:column;gap:1rem">
+      <div class="field-group">
+        <label class="field-label">Upload IDs</label>
+        <textarea class="field-textarea" id="uid-input" rows="7" placeholder="Paste one or more Upload IDs here&#10;Separate by space, comma, or new line&#10;&#10;e.g. upload_abc123&#10;upload_def456" oninput="updateUidCount()"></textarea>
+        <div class="field-hint" id="uid-count">No IDs detected yet.</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:.75rem">
+        <button class="btn btn-primary" onclick="alert('Enrichment request sent (mock)')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Send
+        </button>
+        <button class="btn btn-ghost" onclick="document.getElementById('uid-input').value='';updateUidCount()">Clear</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ VIEW: LEADS & COMPANY UPDATE -->
+<div id="view-leads-update" class="view">
+  <div class="page">
+    <div class="page-head">
+      <button class="btn btn-ghost" onclick="navigate('home')" style="padding:.4rem .5rem">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </button>
+      <div>
+        <div class="page-head-title">Leads & Company Update</div>
+        <div class="page-head-sub">Upload a CSV to update table records via webhook</div>
+      </div>
+    </div>
+
+    <div style="max-width:480px;display:flex;flex-direction:column;gap:1.25rem">
+      <!-- table selector -->
+      <div>
+        <div class="field-label" style="margin-bottom:.5rem">Target table</div>
+        <div style="display:flex;gap:.375rem">
+          <button class="btn btn-active" id="lu-tab-cons" onclick="luSetTable('cons')">Consolidated</button>
+          <button class="btn btn-ghost" id="lu-tab-company" onclick="luSetTable('company')">Company</button>
+        </div>
+      </div>
+
+      <!-- drop zone -->
+      <div id="lu-dropzone" style="border:1.5px dashed var(--border);border-radius:var(--r);padding:2rem 1.5rem;text-align:center;cursor:pointer;transition:border-color .15s;background:var(--surface)"
+        onmouseenter="this.style.borderColor='hsl(217,91%,60%,0.4)'" onmouseleave="this.style.borderColor=''"
+        onclick="document.getElementById('lu-file').click()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--muted);margin:0 auto .75rem"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <div style="font-size:13px;font-weight:500;margin-bottom:.3rem">Drop CSV here or click to browse</div>
+        <div style="font-size:12px;color:var(--muted)" id="lu-filename">No file selected</div>
+        <input type="file" id="lu-file" accept=".csv" style="display:none" onchange="luFileSelected(this)" />
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <button class="btn btn-ghost" style="font-size:12px">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download sample CSV
+        </button>
+        <button class="btn btn-primary" id="lu-submit" disabled onclick="alert('Upload submitted (mock)')">Upload</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -805,6 +1286,76 @@ function renderCons() {
 
 renderPortcoList();
 renderCons();
+
+// ── Chip type selector init ────────────────────────────────────────────────
+const INVESTOR_TYPES = ['VC','PE','CVC','Hedge Fund','Family Office','Angel','Accelerator','Debt'];
+
+function buildChips(containerId) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = INVESTOR_TYPES.map(t =>
+    `<button class="chip" onclick="this.classList.toggle('active')">${t}</button>`
+  ).join('');
+}
+
+buildChips('ni-types');
+buildChips('pb-types');
+buildChips('nl-types');
+
+// ── Mode toggles ───────────────────────────────────────────────────────────
+function setMode(prefix, mode) {
+  ['contact','company'].forEach(m => {
+    const tab = document.getElementById(`${prefix}-tab-${m}`);
+    const form = document.getElementById(`${prefix}-form-${m}`);
+    if (tab) tab.className = m === mode ? 'btn btn-active' : 'btn btn-ghost';
+    if (form) form.style.display = m === mode ? 'block' : 'none';
+  });
+}
+function niSetMode(m) { setMode('ni', m); }
+function pbSetMode(m) { setMode('pb', m); }
+function nlSetMode(m) { setMode('nl', m); }
+
+// ── Mock search results ────────────────────────────────────────────────────
+function showSearchResults(id) {
+  const el = document.getElementById(id);
+  if (el) { el.style.display = 'block'; el.scrollIntoView({ behavior:'smooth', block:'start' }); }
+}
+function resetForm(prefix) {
+  const r = document.getElementById(`${prefix}-results`);
+  if (r) r.style.display = 'none';
+}
+
+// ── Upload ID count ────────────────────────────────────────────────────────
+function updateUidCount() {
+  const raw = document.getElementById('uid-input').value;
+  const ids = raw.split(/[\s,\n]+/).map(s=>s.trim()).filter(Boolean);
+  const el = document.getElementById('uid-count');
+  if (el) el.textContent = ids.length === 0 ? 'No IDs detected yet.' : `${ids.length} ID(s) will be sent.`;
+}
+
+// ── Leads update table toggle ──────────────────────────────────────────────
+function luSetTable(t) {
+  ['cons','company'].forEach(k => {
+    const el = document.getElementById(`lu-tab-${k}`);
+    if (el) el.className = k === t ? 'btn btn-active' : 'btn btn-ghost';
+  });
+}
+
+// ── File selected ──────────────────────────────────────────────────────────
+function luFileSelected(input) {
+  const fn = document.getElementById('lu-filename');
+  const btn = document.getElementById('lu-submit');
+  if (input.files[0]) {
+    if (fn) fn.textContent = input.files[0].name;
+    if (btn) btn.disabled = false;
+  }
+}
+
+// ── Wire up tool-row clicks on home ───────────────────────────────────────
+document.querySelectorAll('.tool-row').forEach((row, i) => {
+  const views = ['new-investors','pick-base','transform-csv','leads-update','upload-id','new-leads'];
+  row.onclick = () => navigate(views[i] || 'home');
+});
 </script>
 </body>
 </html>
