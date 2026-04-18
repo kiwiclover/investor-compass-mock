@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Investor Compass</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Design tokens (mirrors investor-compass index.css) ─────────────── */
+    :root {
+      --bg:        hsl(222,47%,6%);
+      --card:      hsl(222,47%,8%);
+      --card-h:    hsl(222,47%,11%);
+      --border:    hsl(222,47%,18%);
+      --primary:   hsl(217,91%,60%);
+      --primary-fg:hsl(222,47%,6%);
+      --fg:        hsl(210,40%,98%);
+      --muted:     hsl(215,20%,55%);
+      --secondary: hsl(222,47%,14%);
+      --success:   hsl(142,76%,36%);
+      --warning:   hsl(38,92%,50%);
+      --danger:    hsl(0,84%,60%);
+      --purple:    hsl(265,70%,62%);
+      --teal:      hsl(180,55%,42%);
+      --amber:     hsl(38,92%,50%);
+      --radius:    0.75rem;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'Inter', system-ui, sans-serif;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: hsl(222,47%,22%); border-radius: 99px; }
+
+    /* ── Views ──────────────────────────────────────────────────────────── */
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* ── Header ─────────────────────────────────────────────────────────── */
+    header {
+      position: relative;
+      overflow: hidden;
+      border-bottom: 1px solid var(--border);
+      padding: 2rem 2rem 1.75rem;
+    }
+    header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, hsl(217,91%,60%,0.06), transparent);
+      pointer-events: none;
+    }
+    header::after {
+      content: '';
+      position: absolute;
+      top: -60px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 200px;
+      background: hsl(217,91%,60%,0.12);
+      filter: blur(80px);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .header-inner {
+      position: relative;
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .header-left { display: flex; gap: .75rem; }
+    .header-right { display: flex; gap: .75rem; }
+    .header-center {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .5rem;
+    }
+    .logo-wrap {
+      position: relative;
+      width: 52px; height: 52px;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, var(--primary), hsl(217,91%,45%));
+      border-radius: 14px;
+      box-shadow: 0 0 24px hsl(217,91%,60%,0.35);
+    }
+    .logo-wrap svg { color: var(--primary-fg); }
+    .header-title { font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; }
+    .header-sub {
+      display: flex; align-items: center; gap: .4rem;
+      font-size: .8rem; color: var(--muted);
+    }
+    .header-sub svg { color: var(--warning); }
+
+    /* ── Buttons ─────────────────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .5rem 1rem;
+      border-radius: calc(var(--radius) - 2px);
+      font-size: .85rem; font-weight: 500;
+      cursor: pointer; border: none; transition: all .2s;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+    .btn-primary {
+      background: var(--primary); color: var(--primary-fg);
+      box-shadow: 0 4px 14px hsl(217,91%,60%,0.3);
+    }
+    .btn-primary:hover { background: hsl(217,91%,54%); box-shadow: 0 4px 20px hsl(217,91%,60%,0.45); }
+    .btn-outline {
+      background: transparent; color: var(--fg);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover { background: var(--secondary); border-color: hsl(217,91%,60%,0.4); }
+    .btn-ghost {
+      background: transparent; color: var(--muted);
+      border: none;
+    }
+    .btn-ghost:hover { background: var(--secondary); color: var(--fg); }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-danger:hover { background: hsl(0,84%,52%); }
+
+    /* ── Badge ───────────────────────────────────────────────────────────── */
+    .badge {
+      display: inline-flex; align-items: center;
+      padding: .2rem .55rem;
+      border-radius: 99px;
+      font-size: .7rem; font-weight: 600;
+      letter-spacing: .02em;
+    }
+    .badge-new { background: hsl(217,91%,60%,0.15); color: var(--primary); border: 1px solid hsl(217,91%,60%,0.3); }
+    .badge-rec { background: hsl(142,76%,36%,0.15); color: var(--success); border: 1px solid hsl(142,76%,36%,0.3); }
+
+    /* ── Container ───────────────────────────────────────────────────────── */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+
+    /* ── Section label ───────────────────────────────────────────────────── */
+    .section-label {
+      font-size: .7rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--muted);
+      display: flex; align-items: center; gap: .5rem;
+    }
+    .section-label::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* ── Quick-access grid ───────────────────────────────────────────────── */
+    .quick-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+    @media (max-width: 900px) { .quick-grid { grid-template-columns: repeat(2,1fr); } }
+    @media (max-width: 560px) { .quick-grid { grid-template-columns: 1fr; } }
+
+    .quick-card {
+      position: relative;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem 1.25rem 1.25rem;
+      cursor: pointer;
+      transition: all .25s;
+      overflow: hidden;
+      display: flex; flex-direction: column; gap: .75rem;
+    }
+    .quick-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: var(--glow, transparent);
+      opacity: 0;
+      transition: opacity .3s;
+      pointer-events: none;
+    }
+    .quick-card:hover { background: var(--card-h); border-color: hsl(217,91%,60%,0.35); transform: translateY(-2px); }
+    .quick-card:hover::before { opacity: 1; }
+    .quick-card:active { transform: translateY(0); }
+
+    .quick-icon {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--icon-bg, hsl(217,91%,60%,0.12));
+      color: var(--icon-color, var(--primary));
+      transition: background .2s;
+    }
+    .quick-card:hover .quick-icon {
+      background: var(--icon-bg-h, hsl(217,91%,60%,0.22));
+    }
+    .quick-card-title {
+      font-size: 1rem; font-weight: 700; color: var(--fg);
+      line-height: 1.2;
+    }
+    .quick-card-desc {
+      font-size: .8rem; color: var(--muted); line-height: 1.5; flex: 1;
+    }
+    .quick-card-arrow {
+      display: flex; align-items: center; gap: .3rem;
+      font-size: .8rem; font-weight: 600;
+      color: var(--primary);
+      margin-top: .25rem;
+    }
+
+    /* CRM card special */
+    .quick-card.crm-card {
+      --icon-bg: hsl(265,70%,62%,0.12);
+      --icon-color: var(--purple);
+      --icon-bg-h: hsl(265,70%,62%,0.22);
+    }
+    .quick-card.crm-card:hover { border-color: hsl(265,70%,62%,0.35); }
+    .quick-card.crm-card .quick-card-arrow { color: var(--purple); }
+
+    /* ── Tools grid ──────────────────────────────────────────────────────── */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: .75rem;
+    }
+    @media (max-width: 800px) { .tools-grid { grid-template-columns: repeat(2,1fr); } }
+    @media (max-width: 500px) { .tools-grid { grid-template-columns: 1fr; } }
+
+    .tool-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1rem .875rem;
+      cursor: pointer;
+      transition: all .2s;
+      display: flex; flex-direction: column; gap: .5rem;
+    }
+    .tool-card:hover { background: var(--card-h); border-color: hsl(217,91%,60%,0.25); }
+    .tool-card-header { display: flex; align-items: center; gap: .6rem; }
+    .tool-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: hsl(217,91%,60%,0.1);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--primary); flex-shrink: 0;
+    }
+    .tool-card-title { font-size: .875rem; font-weight: 600; }
+    .tool-card-desc { font-size: .75rem; color: var(--muted); line-height: 1.4; }
+    .tool-card-btn {
+      margin-top: .25rem;
+      width: 100%;
+      padding: .45rem .75rem;
+      font-size: .78rem;
+      border-radius: calc(var(--radius) - 4px);
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--fg);
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 500;
+      transition: all .2s;
+      display: flex; align-items: center; justify-content: center; gap: .35rem;
+    }
+    .tool-card-btn:hover { background: var(--secondary); border-color: hsl(217,91%,60%,0.3); }
+
+    /* ── CRM view ────────────────────────────────────────────────────────── */
+    .page-header {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 1.75rem 0 .25rem;
+    }
+    .page-title { font-size: 1.6rem; font-weight: 800; letter-spacing: -.02em; }
+    .page-sub { font-size: .85rem; color: var(--muted); margin-top: .2rem; }
+
+    .portco-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+    @media (max-width: 800px) { .portco-grid { grid-template-columns: repeat(2,1fr); } }
+    @media (max-width: 500px) { .portco-grid { grid-template-columns: 1fr; } }
+
+    .portco-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      cursor: pointer;
+      transition: all .25s;
+      position: relative;
+      overflow: hidden;
+    }
+    .portco-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--primary);
+      transform: scaleX(0);
+      transition: transform .25s;
+    }
+    .portco-card:hover { background: var(--card-h); border-color: hsl(217,91%,60%,0.35); transform: translateY(-2px); }
+    .portco-card:hover::after { transform: scaleX(1); }
+
+    .portco-logo {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: .9rem; color: #fff;
+      margin-bottom: .75rem;
+    }
+    .portco-name { font-size: 1rem; font-weight: 700; margin-bottom: .2rem; }
+    .portco-sector { font-size: .75rem; color: var(--muted); margin-bottom: .875rem; }
+    .portco-stats {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: .5rem;
+    }
+    .portco-stat { background: hsl(222,47%,12%); border-radius: .5rem; padding: .5rem .625rem; }
+    .portco-stat-val { font-size: .95rem; font-weight: 700; color: var(--primary); }
+    .portco-stat-label { font-size: .65rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-top: .1rem; }
+
+    /* ── Portco detail / table ───────────────────────────────────────────── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: .5rem;
+      font-size: .8rem; color: var(--muted);
+      padding: 1.25rem 0 .5rem;
+    }
+    .breadcrumb span { cursor: pointer; }
+    .breadcrumb span:hover { color: var(--fg); }
+    .breadcrumb .sep { opacity: .4; }
+    .breadcrumb .current { color: var(--fg); font-weight: 500; cursor: default; }
+
+    .detail-header {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem; padding: .5rem 0 1.5rem;
+    }
+    .detail-logo-wrap { display: flex; align-items: center; gap: .875rem; }
+    .detail-logo {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 1rem; color: #fff;
+    }
+    .detail-name { font-size: 1.5rem; font-weight: 800; }
+    .detail-meta { font-size: .8rem; color: var(--muted); margin-top: .15rem; }
+    .detail-actions { display: flex; gap: .6rem; }
+
+    /* filter bar */
+    .filter-bar {
+      display: flex; align-items: center; gap: .75rem;
+      padding: .875rem 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1rem;
+    }
+    .filter-search {
+      flex: 1; max-width: 280px;
+      position: relative;
+    }
+    .filter-search input {
+      width: 100%;
+      background: var(--secondary);
+      border: 1px solid var(--border);
+      border-radius: calc(var(--radius) - 2px);
+      padding: .45rem .75rem .45rem 2rem;
+      color: var(--fg);
+      font-size: .82rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .filter-search input:focus { border-color: hsl(217,91%,60%,0.5); }
+    .filter-search input::placeholder { color: var(--muted); }
+    .filter-search-icon {
+      position: absolute; left: .6rem; top: 50%; transform: translateY(-50%);
+      color: var(--muted); pointer-events: none;
+    }
+    .filter-count { font-size: .8rem; color: var(--muted); margin-left: auto; white-space: nowrap; }
+
+    /* table */
+    .table-wrap {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    table {
+      width: 100%; border-collapse: collapse;
+      font-size: .83rem;
+    }
+    thead th {
+      background: hsl(222,47%,10%);
+      padding: .75rem 1rem;
+      text-align: left;
+      font-size: .7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    tbody tr {
+      border-bottom: 1px solid hsl(222,47%,14%);
+      transition: background .15s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: hsl(222,47%,10%); }
+    td {
+      padding: .75rem 1rem;
+      color: var(--fg);
+      vertical-align: middle;
+    }
+    .td-contact { display: flex; flex-direction: column; gap: .1rem; }
+    .td-contact-name { font-weight: 600; font-size: .85rem; }
+    .td-contact-title { font-size: .72rem; color: var(--muted); }
+    .td-fund { font-size: .83rem; }
+    .td-email { font-size: .78rem; color: var(--muted); }
+    .td-link a {
+      color: var(--primary); text-decoration: none; font-size: .78rem;
+    }
+    .td-link a:hover { text-decoration: underline; }
+
+    /* status badge + select */
+    .status-select {
+      appearance: none;
+      background: var(--status-bg, hsl(215,20%,55%,0.12));
+      color: var(--status-color, var(--muted));
+      border: 1px solid var(--status-border, hsl(215,20%,55%,0.25));
+      border-radius: 99px;
+      padding: .25rem .8rem .25rem .65rem;
+      font-size: .72rem; font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all .2s;
+      white-space: nowrap;
+    }
+    .status-select:focus { outline: none; }
+    .status-select:hover { filter: brightness(1.15); }
+
+    /* status color classes applied via JS */
+    .s-none    { --status-bg:hsl(215,20%,55%,0.12); --status-color:hsl(215,20%,65%); --status-border:hsl(215,20%,55%,0.25); }
+    .s-email   { --status-bg:hsl(217,91%,60%,0.12); --status-color:var(--primary);   --status-border:hsl(217,91%,60%,0.3);  }
+    .s-pos     { --status-bg:hsl(142,76%,36%,0.15); --status-color:var(--success);   --status-border:hsl(142,76%,36%,0.3);  }
+    .s-neg     { --status-bg:hsl(0,84%,60%,0.12);   --status-color:var(--danger);    --status-border:hsl(0,84%,60%,0.3);    }
+    .s-booked  { --status-bg:hsl(265,70%,62%,0.12); --status-color:var(--purple);    --status-border:hsl(265,70%,62%,0.3);  }
+    .s-done    { --status-bg:hsl(180,55%,42%,0.12); --status-color:var(--teal);      --status-border:hsl(180,55%,42%,0.3);  }
+    .s-neg2    { --status-bg:hsl(38,92%,50%,0.12);  --status-color:var(--amber);     --status-border:hsl(38,92%,50%,0.3);   }
+
+    /* Consolidated mock table */
+    .cons-tag {
+      display: inline-flex; align-items: center;
+      padding: .18rem .55rem;
+      border-radius: 99px;
+      font-size: .68rem; font-weight: 600;
+      background: hsl(217,91%,60%,0.12);
+      color: var(--primary);
+      border: 1px solid hsl(217,91%,60%,0.2);
+    }
+
+    /* empty state */
+    .empty-state {
+      text-align: center; padding: 4rem 2rem;
+      color: var(--muted);
+    }
+    .empty-state svg { margin: 0 auto 1rem; opacity: .3; }
+    .empty-state p { font-size: .9rem; }
+
+    /* summary strip under detail header */
+    .status-summary {
+      display: flex; gap: .5rem; flex-wrap: wrap;
+      padding: .75rem 0 1rem;
+    }
+    .status-pill {
+      display: flex; align-items: center; gap: .35rem;
+      padding: .3rem .7rem;
+      border-radius: 99px;
+      font-size: .72rem; font-weight: 600;
+      background: var(--pill-bg);
+      color: var(--pill-color);
+      border: 1px solid var(--pill-border);
+    }
+    .status-pill .count {
+      background: hsl(0,0%,100%,0.12);
+      border-radius: 99px;
+      padding: .05rem .35rem;
+      font-size: .65rem;
+    }
+
+    /* ── Misc ────────────────────────────────────────────────────────────── */
+    .divider { height: 1px; background: var(--border); margin: 2rem 0; }
+    .space-y-6 > * + * { margin-top: 1.5rem; }
+    .space-y-4 > * + * { margin-top: 1rem; }
+
+    /* top glow bar on active page */
+    .page-glow {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--primary), transparent);
+      margin-bottom: 0;
+    }
+
+    /* ── Tooltip-style "mock" notice ─────────────────────────────────────── */
+    .mock-notice {
+      position: fixed; bottom: 1.25rem; right: 1.25rem;
+      background: hsl(222,47%,12%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: .6rem 1rem;
+      font-size: .75rem; color: var(--muted);
+      z-index: 99;
+      display: flex; align-items: center; gap: .4rem;
+    }
+    .mock-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--amber);
+      box-shadow: 0 0 6px var(--amber);
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER (shared) ─────────────────────────────────────────────────── -->
+<header>
+  <div class="header-inner">
+    <div class="header-left">
+      <button class="btn btn-primary" onclick="navigate('consolidated')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
+        Consolidated View
+      </button>
+      <button class="btn btn-primary" onclick="navigate('crm')" style="background:hsl(265,70%,58%); box-shadow:0 4px 14px hsl(265,70%,60%,0.3)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Portfolio CRM
+        <span class="badge badge-new" style="font-size:.62rem; padding:.1rem .4rem;">NEW</span>
+      </button>
+    </div>
+
+    <div class="header-center">
+      <div style="display:flex;align-items:center;gap:.875rem;">
+        <div class="logo-wrap">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        </div>
+        <div>
+          <div class="header-title">Investor Compass</div>
+          <div class="header-sub">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            Powered by N8N Automation
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <button class="btn btn-danger">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Log Out
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!-- VIEW: HOME ──────────────────────────────────────────────────────────── -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<div id="view-home" class="view active">
+  <div class="page-glow"></div>
+  <div class="container" style="padding-top:2.5rem; padding-bottom:4rem;">
+
+    <!-- hero -->
+    <div style="text-align:center; margin-bottom:2.5rem;">
+      <h2 style="font-size:2.25rem; font-weight:800; letter-spacing:-.03em; margin-bottom:.5rem;">
+        Welcome back, <span style="color:var(--primary)">Investor Compass</span>
+      </h2>
+      <p style="color:var(--muted); font-size:.95rem; max-width:520px; margin:0 auto; line-height:1.6;">
+        Your all-in-one platform for investor search, portfolio tracking, and outreach management.
+      </p>
+    </div>
+
+    <!-- quick access -->
+    <div class="space-y-4">
+      <div class="section-label">Quick access</div>
+
+      <div class="quick-grid">
+
+        <!-- Consolidated Contacts -->
+        <div class="quick-card" onclick="navigate('consolidated')"
+          style="--glow:radial-gradient(ellipse at 0% 0%, hsl(217,91%,60%,0.08), transparent 60%)">
+          <div class="quick-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
+          </div>
+          <div>
+            <div class="quick-card-title">Consolidated Contacts</div>
+            <div class="quick-card-desc">Browse and filter all investor contacts across every deal and campaign in one unified view.</div>
+          </div>
+          <div class="quick-card-arrow">
+            Open view
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </div>
+
+        <!-- Search Investors -->
+        <div class="quick-card" onclick="navigate('home')"
+          style="--glow:radial-gradient(ellipse at 0% 0%, hsl(217,91%,60%,0.08), transparent 60%)">
+          <div class="quick-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          </div>
+          <div>
+            <div class="quick-card-title">Search Investors</div>
+            <div class="quick-card-desc">Find new investors using PitchBook, internal databases, and AI-powered matching filters.</div>
+          </div>
+          <div class="quick-card-arrow">
+            Start search
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </div>
+
+        <!-- Search Companies -->
+        <div class="quick-card" onclick="navigate('home')"
+          style="--glow:radial-gradient(ellipse at 0% 0%, hsl(217,91%,60%,0.08), transparent 60%)">
+          <div class="quick-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <div>
+            <div class="quick-card-title">Search Companies</div>
+            <div class="quick-card-desc">Look up portfolio companies, investees, and prospects with enriched company intelligence.</div>
+          </div>
+          <div class="quick-card-arrow">
+            Search companies
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </div>
+
+        <!-- Portfolio CRM -->
+        <div class="quick-card crm-card" onclick="navigate('crm')"
+          style="--glow:radial-gradient(ellipse at 0% 0%, hsl(265,70%,62%,0.08), transparent 60%)">
+          <div class="quick-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div>
+            <div style="display:flex;align-items:center;gap:.5rem;">
+              <div class="quick-card-title">Portfolio CRM</div>
+              <span class="badge badge-new">NEW</span>
+            </div>
+            <div class="quick-card-desc">Track outreach status for each portfolio company — from first email to active negotiation.</div>
+          </div>
+          <div class="quick-card-arrow">
+            Open CRM
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- tools -->
+    <div class="space-y-4">
+      <div class="section-label">Tools</div>
+
+      <div class="tools-grid">
+
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div>
+            <div class="tool-card-title">New Investors Search</div>
+          </div>
+          <div class="tool-card-desc">Search for new investors using external APIs with all filters and environmental parameters. Powered by PitchBook Apify Actor.</div>
+          <button class="tool-card-btn">Access Form <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div>
+            <div style="display:flex;align-items:center;gap:.4rem;">
+              <div class="tool-card-title">Investor Picker</div>
+              <span class="badge badge-rec" style="font-size:.62rem; padding:.1rem .4rem;">Rec</span>
+            </div>
+          </div>
+          <div class="tool-card-desc">Pick investors and companies from the internal database using contact or company information.</div>
+          <button class="tool-card-btn">Access Form <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
+            <div class="tool-card-title">Transform to CSV</div>
+          </div>
+          <div class="tool-card-desc">Parse documents and extract investor information. Requires an existing document to parse.</div>
+          <button class="tool-card-btn">Open in new tab <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></button>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></div>
+            <div class="tool-card-title">Leads & Company Update</div>
+          </div>
+          <div class="tool-card-desc">Upload CSV files to update Consolidated or Company tables via webhook.</div>
+          <button class="tool-card-btn">Access Form <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+            <div class="tool-card-title">Upload ID Enrichment</div>
+          </div>
+          <div class="tool-card-desc">Paste Upload ID(s) and send them with the base search payload to the enrichment webhook.</div>
+          <button class="tool-card-btn">Access Form <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg></div>
+            <div class="tool-card-title">New Leads & Companies</div>
+          </div>
+          <div class="tool-card-desc">Add new leads and company records manually with dedicated Contact and Company forms.</div>
+          <button class="tool-card-btn">Access Form <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!-- VIEW: CONSOLIDATED ──────────────────────────────────────────────────── -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<div id="view-consolidated" class="view">
+  <div class="page-glow"></div>
+  <div class="container" style="padding-top:1.5rem; padding-bottom:4rem;">
+
+    <div class="page-header">
+      <button class="btn btn-ghost" onclick="navigate('home')" style="padding:.4rem .6rem">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </button>
+      <div>
+        <div class="page-title">Consolidated Contacts</div>
+        <div class="page-sub">All investor contacts across every campaign — searchable, filterable, downloadable.</div>
+      </div>
+      <div style="margin-left:auto; display:flex; gap:.6rem;">
+        <button class="btn btn-outline" style="font-size:.8rem">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          Filter
+        </button>
+        <button class="btn btn-primary" style="font-size:.8rem">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export CSV
+        </button>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <div class="filter-search">
+        <svg class="filter-search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" placeholder="Search contacts, funds, emails…" />
+      </div>
+      <button class="btn btn-outline" style="font-size:.78rem; padding:.4rem .7rem">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+        All Types
+      </button>
+      <button class="btn btn-outline" style="font-size:.78rem; padding:.4rem .7rem">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        All Regions
+      </button>
+      <div class="filter-count">Showing <strong style="color:var(--fg)">248</strong> contacts</div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:2rem"><input type="checkbox" style="accent-color:var(--primary)"/></th>
+            <th>Contact</th>
+            <th>Fund / Firm</th>
+            <th>Investor Type</th>
+            <th>Stage</th>
+            <th>Email</th>
+            <th>LinkedIn</th>
+            <th>Process Status</th>
+          </tr>
+        </thead>
+        <tbody id="cons-tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- pagination -->
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-top:1rem; font-size:.8rem; color:var(--muted);">
+      <span>Page 1 of 25</span>
+      <div style="display:flex; gap:.4rem;">
+        <button class="btn btn-outline" style="font-size:.78rem; padding:.35rem .7rem">Previous</button>
+        <button class="btn btn-primary" style="font-size:.78rem; padding:.35rem .7rem">Next</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!-- VIEW: CRM ───────────────────────────────────────────────────────────── -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<div id="view-crm" class="view">
+  <div class="page-glow" style="background:linear-gradient(90deg, transparent, var(--purple), transparent)"></div>
+  <div class="container" style="padding-top:1.5rem; padding-bottom:4rem;">
+
+    <div class="page-header">
+      <button class="btn btn-ghost" onclick="navigate('home')" style="padding:.4rem .6rem">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </button>
+      <div>
+        <div class="page-title">Portfolio CRM</div>
+        <div class="page-sub">Select a portfolio company to manage outreach and track investor statuses.</div>
+      </div>
+    </div>
+
+    <div class="portco-grid" id="portco-grid"></div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!-- VIEW: PORTCO DETAIL ─────────────────────────────────────────────────── -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<div id="view-portco" class="view">
+  <div class="page-glow" style="background:linear-gradient(90deg, transparent, var(--purple), transparent)"></div>
+  <div class="container" style="padding-top:.5rem; padding-bottom:4rem;">
+
+    <div class="breadcrumb">
+      <span onclick="navigate('home')">Home</span>
+      <span class="sep">›</span>
+      <span onclick="navigate('crm')">Portfolio CRM</span>
+      <span class="sep">›</span>
+      <span class="current" id="portco-breadcrumb">—</span>
+    </div>
+
+    <div class="detail-header">
+      <div class="detail-logo-wrap">
+        <div class="detail-logo" id="portco-detail-logo"></div>
+        <div>
+          <div class="detail-name" id="portco-detail-name"></div>
+          <div class="detail-meta" id="portco-detail-meta"></div>
+        </div>
+      </div>
+      <div class="detail-actions">
+        <button class="btn btn-outline" style="font-size:.8rem">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export
+        </button>
+        <button class="btn btn-primary" style="font-size:.8rem; background:hsl(265,70%,58%); box-shadow:0 4px 14px hsl(265,70%,60%,0.3)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          Generate Outreach
+        </button>
+      </div>
+    </div>
+
+    <!-- status summary pills -->
+    <div class="status-summary" id="status-summary"></div>
+
+    <div class="filter-bar">
+      <div class="filter-search">
+        <svg class="filter-search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" placeholder="Search contacts, firms…" id="portco-search" oninput="filterPortcoTable()" />
+      </div>
+      <div class="filter-count" id="portco-count"></div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Contact</th>
+            <th>Fund / Firm</th>
+            <th>Investor Type</th>
+            <th>Email</th>
+            <th>LinkedIn</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="portco-tbody"></tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Mock notice ────────────────────────────────────────────────────── -->
+<div class="mock-notice">
+  <div class="mock-dot"></div>
+  UI Mock — no live data
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!-- SCRIPTS ─────────────────────────────────────────────────────────────── -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<script>
+// ── Data ──────────────────────────────────────────────────────────────────
+const STATUSES = [
+  { value: 'none',    label: 'Not In Contact',          cls: 's-none'   },
+  { value: 'email',   label: 'Email Outreach',           cls: 's-email'  },
+  { value: 'pos',     label: 'Outreach Positive Reply',  cls: 's-pos'    },
+  { value: 'neg',     label: 'Outreach Negative Reply',  cls: 's-neg'    },
+  { value: 'booked',  label: 'Meeting Booked',           cls: 's-booked' },
+  { value: 'done',    label: 'Meeting Done',             cls: 's-done'   },
+  { value: 'neg2',    label: 'In Negotiation',           cls: 's-neg2'   },
+];
+
+const STATUS_PILL_STYLES = {
+  none:   { bg:'hsl(215,20%,55%,0.12)', color:'hsl(215,20%,65%)',   border:'hsl(215,20%,55%,0.25)' },
+  email:  { bg:'hsl(217,91%,60%,0.12)', color:'hsl(217,91%,65%)',   border:'hsl(217,91%,60%,0.3)'  },
+  pos:    { bg:'hsl(142,76%,36%,0.15)', color:'hsl(142,76%,46%)',   border:'hsl(142,76%,36%,0.3)'  },
+  neg:    { bg:'hsl(0,84%,60%,0.12)',   color:'hsl(0,84%,68%)',     border:'hsl(0,84%,60%,0.3)'    },
+  booked: { bg:'hsl(265,70%,62%,0.12)', color:'hsl(265,70%,72%)',   border:'hsl(265,70%,62%,0.3)'  },
+  done:   { bg:'hsl(180,55%,42%,0.12)', color:'hsl(180,55%,55%)',   border:'hsl(180,55%,42%,0.3)'  },
+  neg2:   { bg:'hsl(38,92%,50%,0.12)',  color:'hsl(38,92%,60%)',    border:'hsl(38,92%,50%,0.3)'   },
+};
+
+const PORTCOS = [
+  {
+    id: 'meridian',
+    name: 'Meridian Health',
+    sector: 'Healthcare · Series B',
+    stage: 'Series B',
+    color: '#3b82f6',
+    contacts: [
+      { name:'Sarah Chen',      title:'Partner',              fund:'Sequoia Capital',       type:'VC',     email:'s.chen@sequoia.com',    linkedin:'linkedin.com/in/s-chen',     status:'done'   },
+      { name:'Marco Rossi',     title:'Principal',            fund:'Andreessen Horowitz',   type:'VC',     email:'m.rossi@a16z.com',       linkedin:'linkedin.com/in/m-rossi',    status:'booked' },
+      { name:'Priya Nair',      title:'Managing Director',    fund:'General Catalyst',      type:'VC',     email:'p.nair@generalcatalyst.com', linkedin:'linkedin.com/in/p-nair', status:'pos'    },
+      { name:'Tom Wexler',      title:'Analyst',              fund:'Tiger Global',          type:'Hedge',  email:'t.wexler@tigerglobal.com',  linkedin:'linkedin.com/in/t-wexler', status:'email'  },
+      { name:'Lisa Park',       title:'GP',                   fund:'Benchmark Capital',     type:'VC',     email:'l.park@benchmark.com',   linkedin:'linkedin.com/in/l-park',     status:'neg2'   },
+      { name:'Raj Mehta',       title:'VP Investments',       fund:'SoftBank Vision',       type:'CVC',    email:'r.mehta@softbank.com',   linkedin:'linkedin.com/in/r-mehta',    status:'none'   },
+      { name:'Hannah Cole',     title:'Senior Associate',     fund:'Lightspeed Ventures',   type:'VC',     email:'h.cole@lsvp.com',        linkedin:'linkedin.com/in/h-cole',     status:'neg'    },
+      { name:'David Kim',       title:'Partner',              fund:'GV (Google Ventures)',  type:'CVC',    email:'d.kim@gv.com',           linkedin:'linkedin.com/in/d-kim',      status:'none'   },
+    ]
+  },
+  {
+    id: 'arcflow',
+    name: 'Arcflow Systems',
+    sector: 'B2B SaaS · Series A',
+    stage: 'Series A',
+    color: '#8b5cf6',
+    contacts: [
+      { name:'James Okafor',    title:'Partner',              fund:'Index Ventures',        type:'VC',     email:'j.okafor@indexventures.com', linkedin:'linkedin.com/in/j-okafor', status:'pos'   },
+      { name:'Mei Lin Zhang',   title:'Principal',            fund:'Bessemer Venture',      type:'VC',     email:'m.zhang@bvp.com',        linkedin:'linkedin.com/in/m-zhang',    status:'booked' },
+      { name:'Carlos Reyes',    title:'Director',             fund:'Craft Ventures',        type:'VC',     email:'c.reyes@craft.co',       linkedin:'linkedin.com/in/c-reyes',    status:'email'  },
+      { name:'Aisha Osei',      title:'Investment Manager',   fund:'Atomico',               type:'VC',     email:'a.osei@atomico.com',     linkedin:'linkedin.com/in/a-osei',     status:'none'   },
+      { name:'Brett Larson',    title:'GP',                   fund:'Insight Partners',      type:'PE',     email:'b.larson@insightpartners.com', linkedin:'linkedin.com/in/b-larson', status:'neg2' },
+      { name:'Nina Schwartz',   title:'Managing Partner',     fund:'Point Nine Capital',    type:'VC',     email:'n.schwartz@pointnine.com', linkedin:'linkedin.com/in/n-schwartz', status:'done' },
+    ]
+  },
+  {
+    id: 'nexara',
+    name: 'Nexara Labs',
+    sector: 'Biotech · Seed',
+    stage: 'Seed',
+    color: '#10b981',
+    contacts: [
+      { name:'Oliver Ward',     title:'Partner',              fund:'DCVC Bio',              type:'VC',     email:'o.ward@dcvc.com',        linkedin:'linkedin.com/in/o-ward',     status:'email'  },
+      { name:'Sophie Turner',   title:'Principal',            fund:'OrbiMed Advisors',      type:'PE',     email:'s.turner@orbimed.com',   linkedin:'linkedin.com/in/s-turner',   status:'none'   },
+      { name:'Arjun Kapoor',    title:'Associate',            fund:'RA Capital',            type:'Hedge',  email:'a.kapoor@racapital.com', linkedin:'linkedin.com/in/a-kapoor',   status:'pos'    },
+      { name:'Grace Liu',       title:'GP',                   fund:'GV (Google Ventures)',  type:'CVC',    email:'g.liu@gv.com',           linkedin:'linkedin.com/in/g-liu',      status:'neg'    },
+      { name:'Ethan Brooks',    title:'Managing Director',    fund:'Novo Holdings',         type:'CVC',    email:'e.brooks@novo.com',      linkedin:'linkedin.com/in/e-brooks',   status:'none'   },
+    ]
+  },
+  {
+    id: 'wavepath',
+    name: 'Wavepath AI',
+    sector: 'AI / ML · Series A',
+    stage: 'Series A',
+    color: '#f59e0b',
+    contacts: [
+      { name:'Zara Patel',      title:'Partner',              fund:'Andreessen Horowitz',   type:'VC',     email:'z.patel@a16z.com',       linkedin:'linkedin.com/in/z-patel',    status:'neg2'   },
+      { name:'Lucas Müller',    title:'Principal',            fund:'Earlybird VC',          type:'VC',     email:'l.muller@earlybird.com', linkedin:'linkedin.com/in/l-muller',   status:'done'   },
+      { name:'Yuki Tanaka',     title:'Investment Associate', fund:'SoftBank Vision',       type:'CVC',    email:'y.tanaka@softbank.com',  linkedin:'linkedin.com/in/y-tanaka',   status:'booked' },
+      { name:'Amara Diallo',    title:'Partner',              fund:'Balderton Capital',     type:'VC',     email:'a.diallo@balderton.com', linkedin:'linkedin.com/in/a-diallo',   status:'pos'    },
+      { name:'Ryan Nguyen',     title:'Analyst',              fund:'Coatue Management',     type:'Hedge',  email:'r.nguyen@coatue.com',    linkedin:'linkedin.com/in/r-nguyen',   status:'email'  },
+      { name:'Isabel Ferreira', title:'Managing Partner',     fund:'Kaszek Ventures',       type:'VC',     email:'i.ferreira@kaszek.com',  linkedin:'linkedin.com/in/i-ferreira', status:'none'   },
+      { name:'Ben Harding',     title:'Partner',              fund:'Khosla Ventures',       type:'VC',     email:'b.harding@khosla.com',   linkedin:'linkedin.com/in/b-harding',  status:'pos'    },
+    ]
+  },
+  {
+    id: 'clearbridge',
+    name: 'Clearbridge Capital',
+    sector: 'Fintech · Series C',
+    stage: 'Series C',
+    color: '#ef4444',
+    contacts: [
+      { name:'Fiona Walsh',     title:'Partner',              fund:'Tiger Global',          type:'Hedge',  email:'f.walsh@tigerglobal.com',  linkedin:'linkedin.com/in/f-walsh',  status:'done'   },
+      { name:'Dante Romano',    title:'Principal',            fund:'QED Investors',         type:'VC',     email:'d.romano@qedinvestors.com', linkedin:'linkedin.com/in/d-romano', status:'neg2'  },
+      { name:'Chloe Martin',    title:'VP',                   fund:'Ribbit Capital',        type:'VC',     email:'c.martin@ribbit.vc',     linkedin:'linkedin.com/in/c-martin',   status:'booked' },
+      { name:'Marcus Bell',     title:'GP',                   fund:'Accel',                 type:'VC',     email:'m.bell@accel.com',       linkedin:'linkedin.com/in/m-bell',     status:'done'   },
+      { name:'Talia Stone',     title:'Managing Director',    fund:'Greenoaks Capital',     type:'PE',     email:'t.stone@greenoaks.com',  linkedin:'linkedin.com/in/t-stone',    status:'pos'    },
+      { name:'Dev Anand',       title:'Associate',            fund:'Sequoia Capital',       type:'VC',     email:'d.anand@sequoia.com',    linkedin:'linkedin.com/in/d-anand',    status:'email'  },
+      { name:'Emma Johansson',  title:'Senior Associate',     fund:'Northzone',             type:'VC',     email:'e.johansson@northzone.com', linkedin:'linkedin.com/in/e-johansson', status:'none' },
+      { name:'Kwame Asante',    title:'Partner',              fund:'Partech Partners',      type:'VC',     email:'k.asante@partech.com',   linkedin:'linkedin.com/in/k-asante',   status:'neg'    },
+    ]
+  },
+];
+
+// Consolidated mock contacts
+const CONS_CONTACTS = [
+  { name:'Sarah Chen',      fund:'Sequoia Capital',     type:'VC',   stage:'Series B', email:'s.chen@sequoia.com',    status:'Processed'   },
+  { name:'Marco Rossi',     fund:'a16z',                type:'VC',   stage:'Series A', email:'m.rossi@a16z.com',       status:'In Progress' },
+  { name:'Priya Nair',      fund:'General Catalyst',    type:'VC',   stage:'Growth',   email:'p.nair@gc.com',          status:'Processed'   },
+  { name:'Tom Wexler',      fund:'Tiger Global',        type:'Hedge',stage:'Late',     email:'t.wexler@tiger.com',    status:'Queued'      },
+  { name:'Lisa Park',       fund:'Benchmark Capital',   type:'VC',   stage:'Series B', email:'l.park@benchmark.com',  status:'Processed'   },
+  { name:'Raj Mehta',       fund:'SoftBank Vision',     type:'CVC',  stage:'Growth',   email:'r.mehta@softbank.com',  status:'Pending'     },
+  { name:'Hannah Cole',     fund:'Lightspeed Ventures', type:'VC',   stage:'Series A', email:'h.cole@lsvp.com',       status:'In Progress' },
+  { name:'David Kim',       fund:'GV',                  type:'CVC',  stage:'Seed',     email:'d.kim@gv.com',          status:'Queued'      },
+  { name:'James Okafor',    fund:'Index Ventures',      type:'VC',   stage:'Series A', email:'j.okafor@index.com',    status:'Processed'   },
+  { name:'Mei Lin Zhang',   fund:'Bessemer Venture',    type:'VC',   stage:'Series B', email:'m.zhang@bvp.com',       status:'Processed'   },
+];
+
+const STATUS_COLORS = { Processed:'badge-rec', 'In Progress':'badge-new', Queued:'', Pending:'' };
+
+// ── State ──────────────────────────────────────────────────────────────────
+let currentPortco = null;
+
+// ── Navigation ─────────────────────────────────────────────────────────────
+function navigate(view, portcoId) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + view).classList.add('active');
+  window.scrollTo(0, 0);
+
+  if (view === 'portco' && portcoId) {
+    currentPortco = PORTCOS.find(p => p.id === portcoId);
+    renderPortcoDetail(currentPortco);
+  }
+}
+
+// ── Render portco grid ──────────────────────────────────────────────────────
+function renderPortcoGrid() {
+  const grid = document.getElementById('portco-grid');
+  grid.innerHTML = PORTCOS.map(p => {
+    const counts = {};
+    STATUSES.forEach(s => counts[s.value] = 0);
+    p.contacts.forEach(c => counts[c.status]++);
+    const inProgress = (counts.email + counts.pos + counts.booked + counts.done + counts.neg2);
+
+    return `
+      <div class="portco-card" onclick="navigate('portco','${p.id}')">
+        <div class="portco-logo" style="background:${p.color}">${p.name.substring(0,2).toUpperCase()}</div>
+        <div class="portco-name">${p.name}</div>
+        <div class="portco-sector">${p.sector}</div>
+        <div class="portco-stats">
+          <div class="portco-stat">
+            <div class="portco-stat-val">${p.contacts.length}</div>
+            <div class="portco-stat-label">Contacts</div>
+          </div>
+          <div class="portco-stat">
+            <div class="portco-stat-val" style="color:hsl(142,76%,46%)">${inProgress}</div>
+            <div class="portco-stat-label">Active</div>
+          </div>
+          <div class="portco-stat">
+            <div class="portco-stat-val" style="color:hsl(38,92%,60%)">${counts.neg2}</div>
+            <div class="portco-stat-label">Negotiating</div>
+          </div>
+          <div class="portco-stat">
+            <div class="portco-stat-val" style="color:hsl(215,20%,65%)">${counts.none}</div>
+            <div class="portco-stat-label">Not Contacted</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ── Render portco detail ────────────────────────────────────────────────────
+function renderPortcoDetail(portco) {
+  document.getElementById('portco-breadcrumb').textContent = portco.name;
+  document.getElementById('portco-detail-name').textContent = portco.name;
+  document.getElementById('portco-detail-meta').textContent = portco.sector;
+
+  const logo = document.getElementById('portco-detail-logo');
+  logo.textContent = portco.name.substring(0,2).toUpperCase();
+  logo.style.background = portco.color;
+
+  renderPortcoTable(portco.contacts);
+  renderStatusSummary(portco.contacts);
+}
+
+function renderStatusSummary(contacts) {
+  const counts = {};
+  STATUSES.forEach(s => counts[s.value] = 0);
+  contacts.forEach(c => counts[c.status]++);
+
+  const summary = document.getElementById('status-summary');
+  summary.innerHTML = STATUSES.map(s => {
+    if (!counts[s.value]) return '';
+    const style = STATUS_PILL_STYLES[s.value];
+    return `<div class="status-pill" style="--pill-bg:${style.bg};--pill-color:${style.color};--pill-border:${style.border}">
+      ${s.label} <span class="count">${counts[s.value]}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderPortcoTable(contacts) {
+  const tbody = document.getElementById('portco-tbody');
+  tbody.innerHTML = contacts.map((c, i) => {
+    const s = STATUSES.find(x => x.value === c.status);
+    const options = STATUSES.map(st =>
+      `<option value="${st.value}"${st.value === c.status ? ' selected' : ''}>${st.label}</option>`
+    ).join('');
+
+    return `
+      <tr>
+        <td>
+          <div class="td-contact">
+            <div class="td-contact-name">${c.name}</div>
+            <div class="td-contact-title">${c.title}</div>
+          </div>
+        </td>
+        <td class="td-fund">${c.fund}</td>
+        <td><span class="cons-tag">${c.type}</span></td>
+        <td class="td-email">${c.email}</td>
+        <td class="td-link"><a href="https://${c.linkedin}" target="_blank" onclick="event.stopPropagation()">View →</a></td>
+        <td>
+          <select class="status-select ${s.cls}" onchange="updateStatus(this, ${i})">
+            ${options}
+          </select>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  document.getElementById('portco-count').innerHTML =
+    `Showing <strong style="color:var(--fg)">${contacts.length}</strong> contacts`;
+}
+
+function updateStatus(sel, idx) {
+  if (!currentPortco) return;
+  const newStatus = sel.value;
+  currentPortco.contacts[idx].status = newStatus;
+  const s = STATUSES.find(x => x.value === newStatus);
+  // remove all status classes
+  STATUSES.forEach(st => sel.classList.remove(st.cls));
+  sel.classList.add(s.cls);
+  renderStatusSummary(currentPortco.contacts);
+}
+
+function filterPortcoTable() {
+  if (!currentPortco) return;
+  const q = document.getElementById('portco-search').value.toLowerCase();
+  const filtered = q
+    ? currentPortco.contacts.filter(c =>
+        c.name.toLowerCase().includes(q) || c.fund.toLowerCase().includes(q) || c.email.toLowerCase().includes(q)
+      )
+    : currentPortco.contacts;
+  renderPortcoTable(filtered);
+}
+
+// ── Render consolidated mock ────────────────────────────────────────────────
+function renderConsolidated() {
+  const tbody = document.getElementById('cons-tbody');
+  tbody.innerHTML = CONS_CONTACTS.map(c => `
+    <tr>
+      <td><input type="checkbox" style="accent-color:var(--primary)"/></td>
+      <td>
+        <div class="td-contact">
+          <div class="td-contact-name">${c.name}</div>
+        </div>
+      </td>
+      <td class="td-fund">${c.fund}</td>
+      <td><span class="cons-tag">${c.type}</span></td>
+      <td><span class="cons-tag" style="background:hsl(265,70%,62%,0.1);color:hsl(265,70%,72%);border-color:hsl(265,70%,62%,0.2)">${c.stage}</span></td>
+      <td class="td-email">${c.email}</td>
+      <td class="td-link"><a href="#" onclick="return false">View →</a></td>
+      <td><span class="cons-tag ${STATUS_COLORS[c.status] || ''}" style="${
+        c.status === 'In Progress' ? '' :
+        c.status === 'Processed'   ? 'background:hsl(142,76%,36%,0.12);color:hsl(142,76%,46%);border-color:hsl(142,76%,36%,0.25)' :
+        'background:hsl(215,20%,55%,0.1);color:hsl(215,20%,65%);border-color:hsl(215,20%,55%,0.2)'
+      }">${c.status}</span></td>
+    </tr>
+  `).join('');
+}
+
+// ── Init ────────────────────────────────────────────────────────────────────
+renderPortcoGrid();
+renderConsolidated();
+</script>
+</body>
+</html>
