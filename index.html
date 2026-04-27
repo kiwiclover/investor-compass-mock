@@ -363,6 +363,37 @@
     .field-textarea:focus { border-color: hsl(217,91%,60%,0.45); }
     .field-textarea::placeholder { color: var(--muted); }
 
+    /* ── Inline editing ───────────────────────────────────── */
+    .cell-view  { display:inline-flex; align-items:center; gap:3px; }
+    .pen-btn {
+      flex-shrink:0; background:none; border:none; cursor:pointer; padding:1px 2px;
+      border-radius:3px; color:var(--muted); opacity:0; transition:opacity .12s;
+      display:inline-flex; align-items:center; line-height:1;
+    }
+    tr:hover .pen-btn { opacity:.55; }
+    .pen-btn:hover { opacity:1 !important; color:var(--blue); }
+    .cell-edit  { align-items:center; gap:3px; flex-wrap:nowrap; }
+    .inline-input {
+      background:hsl(222,47%,12%); border:1px solid var(--blue);
+      border-radius:4px; color:var(--fg); font-size:12px;
+      padding:2px 5px; outline:none; width:120px; font-family:inherit;
+    }
+    .action-btn {
+      flex-shrink:0; background:none; border:1px solid transparent;
+      border-radius:4px; cursor:pointer; padding:2px 3px;
+      display:inline-flex; align-items:center; transition:background .1s, border-color .1s;
+    }
+    .ok-btn     { color:hsl(142,60%,50%); }
+    .ok-btn:hover { background:hsl(142,50%,13%); border-color:hsl(142,50%,28%); }
+    .cancel-btn { color:var(--danger); }
+    .cancel-btn:hover { background:hsl(0,50%,13%); border-color:hsl(0,50%,30%); }
+    .confirm-box {
+      align-items:center; gap:3px;
+      background:hsl(222,47%,13%); border:1px solid var(--border);
+      border-radius:5px; padding:2px 6px; white-space:nowrap;
+    }
+    .confirm-label { font-size:11px; color:var(--muted); margin-right:1px; }
+
     /* chip multi-select */
     .chip-row { display: flex; flex-wrap: wrap; gap: .375rem; }
     .chip {
@@ -1172,10 +1203,36 @@ function renderDetail(p) {
 
 let selectedIdxs = new Set();
 
+function makeEditable(filtIdx, origIdx, field, value, valStyle) {
+  const id = `cell-${filtIdx}-${field}`;
+  const safe = String(value||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const penIcon  = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
+  const checkIcon = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`;
+  const xIcon    = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+  return `<div id="${id}" data-orig="${origIdx}">
+    <span class="cell-view">
+      <span class="cell-val" style="${valStyle||''}">${value||''}</span>
+      <button class="pen-btn" onclick="startEdit(${filtIdx},'${field}')" title="Edit field">${penIcon}</button>
+    </span>
+    <span class="cell-edit" style="display:none">
+      <input class="inline-input" value="${safe}"
+        onkeydown="if(event.key==='Enter')tryConfirm(${filtIdx},'${field}');else if(event.key==='Escape')cancelEdit(${filtIdx},'${field}')" />
+      <button class="action-btn ok-btn" onclick="tryConfirm(${filtIdx},'${field}')" title="Save">${checkIcon}</button>
+      <button class="action-btn cancel-btn" onclick="cancelEdit(${filtIdx},'${field}')" title="Cancel">${xIcon}</button>
+      <span class="confirm-box" style="display:none">
+        <span class="confirm-label">Save edit?</span>
+        <button class="action-btn ok-btn" onclick="saveEdit(${filtIdx},'${field}')" title="Confirm">${checkIcon}</button>
+        <button class="action-btn cancel-btn" onclick="hideConfirm(${filtIdx},'${field}')" title="No">${xIcon}</button>
+      </span>
+    </span>
+  </div>`;
+}
+
 function renderPortcoRows(contacts) {
   document.getElementById('portco-count').innerHTML =
     `<strong>${contacts.length}</strong> contacts`;
   document.getElementById('portco-tbody').innerHTML = contacts.map((c, i) => {
+    const origIdx = currentPortco.contacts.indexOf(c);
     const s = STATUSES.find(x => x.v === c.status);
     const opts = STATUSES.map(st =>
       `<option value="${st.v}"${st.v === c.status?' selected':''}>${st.label}</option>`
@@ -1187,11 +1244,14 @@ function renderPortcoRows(contacts) {
           <input type="checkbox" ${checked} style="accent-color:var(--blue);cursor:pointer;display:block;margin:0 auto"
             onchange="toggleRow(this,${i})" />
         </td>
-        <td><div class="td-name">${c.name}</div><div class="td-sub">${c.title}</div></td>
-        <td style="font-size:13px">${c.fund}</td>
-        <td style="font-size:12px;color:var(--muted)">${c.type}</td>
-        <td style="font-size:12px;color:var(--muted)">${c.email}</td>
-        <td class="td-link"><a href="https://${c.linkedin}" target="_blank">↗</a></td>
+        <td>
+          ${makeEditable(i,origIdx,'name',c.name,'font-weight:600;font-size:13px')}
+          ${makeEditable(i,origIdx,'title',c.title,'font-size:12px;color:var(--muted)')}
+        </td>
+        <td>${makeEditable(i,origIdx,'fund',c.fund,'font-size:13px')}</td>
+        <td>${makeEditable(i,origIdx,'type',c.type,'font-size:12px;color:var(--muted)')}</td>
+        <td>${makeEditable(i,origIdx,'email',c.email,'font-size:12px;color:var(--muted)')}</td>
+        <td class="td-link">${makeEditable(i,origIdx,'linkedin',c.linkedin,'font-size:11px;color:var(--blue)')}</td>
         <td>
           <select class="status-sel ${s.cls}" onchange="updateStatus(this,${i})">
             ${opts}
@@ -1311,6 +1371,50 @@ function renderCons() {
       </tr>
     `;
   }).join('');
+}
+
+// ── Inline edit lifecycle ──────────────────────────────────────────────────
+function startEdit(i, field) {
+  const cell = document.getElementById(`cell-${i}-${field}`);
+  if (!cell) return;
+  cell.querySelector('.cell-view').style.display = 'none';
+  const es = cell.querySelector('.cell-edit');
+  es.style.display = 'inline-flex';
+  const inp = es.querySelector('.inline-input');
+  inp.focus(); inp.select();
+}
+
+function cancelEdit(i, field) {
+  const cell = document.getElementById(`cell-${i}-${field}`);
+  if (!cell) return;
+  cell.querySelector('.confirm-box').style.display = 'none';
+  cell.querySelector('.cell-edit').style.display = 'none';
+  cell.querySelector('.cell-view').style.display = 'inline-flex';
+  cell.querySelector('.inline-input').value = cell.querySelector('.cell-val').textContent;
+}
+
+function tryConfirm(i, field) {
+  const cell = document.getElementById(`cell-${i}-${field}`);
+  if (cell) cell.querySelector('.confirm-box').style.display = 'inline-flex';
+}
+
+function hideConfirm(i, field) {
+  const cell = document.getElementById(`cell-${i}-${field}`);
+  if (cell) cell.querySelector('.confirm-box').style.display = 'none';
+}
+
+function saveEdit(i, field) {
+  const cell = document.getElementById(`cell-${i}-${field}`);
+  if (!cell || !currentPortco) return;
+  const newVal = cell.querySelector('.inline-input').value;
+  const origIdx = parseInt(cell.dataset.orig);
+  if (!isNaN(origIdx) && currentPortco.contacts[origIdx]) {
+    currentPortco.contacts[origIdx][field] = newVal;
+  }
+  cell.querySelector('.cell-val').textContent = newVal;
+  cell.querySelector('.confirm-box').style.display = 'none';
+  cell.querySelector('.cell-edit').style.display = 'none';
+  cell.querySelector('.cell-view').style.display = 'inline-flex';
 }
 
 renderPortcoList();
